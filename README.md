@@ -117,8 +117,11 @@ sh start.sh
 **插件**：把 `.anzu` 丢进 `plugins/` 目录，2 秒内自动装好（默认未启用），
 去「插件」页点「启用」；也可以在「插件」页直接上传。
 
-**插件从哪来**：官方插件站正在准备中；此前可以先用自己的或第三方的 `.anzu`
-（`qixinpack pack` 打出来的就是，签名包开箱可装）。
+**插件从哪来**：官方插件仓库
+[QixinBot-go-plugins](https://github.com/inoryxin/QixinBot-go-plugins)（源码 + 签名 `.anzu` 包，
+各插件的说明在仓库里各自的目录）；也可以先用自己的或第三方的 `.anzu`
+（`qixinpack pack` 打出来的就是，签名包开箱可装）。第三方插件想展示在插件商店：
+发[收录申请 Issue](https://github.com/inoryxin/QixinBot-go-plugins/issues/new?template=plugin-submission.yml)。
 
 ### 6. 常用的几个开关
 
