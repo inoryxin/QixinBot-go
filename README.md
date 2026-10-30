@@ -7,8 +7,8 @@
 <p align="center">基于 OneBot 11 的机器人框架：<b>宿主用 Go，插件用任意语言</b>（独立子进程，stdio + JSON-RPC）</p>
 
 <p align="center">
-  <a href="/inoryxin/QixinBot-go/releases">下载</a> ·
-  <a href="/inoryxin/QixinBot-go/wiki">文档</a> ·
+  <a href="https://github.com/inoryxin/QixinBot-go/releases">下载</a> ·
+  <a href="http://10.0.0.123:8090/">文档</a> ·
   <a href="LICENSE">MIT License</a>
 </p>
 
@@ -56,7 +56,7 @@
 
 ### 1. 下载
 
-到 [Releases](/inoryxin/QixinBot-go/releases) 页面按平台下载：
+到 [Releases](https://github.com/inoryxin/QixinBot-go/releases) 页面按平台下载：
 
 | 文件 | 说明 |
 |---|---|
@@ -148,7 +148,7 @@ cd <框架包>/bin
 ./qixinpack pack my-plugin -out plugins/my-plugin.anzu
 ```
 
-完整手册见 [Wiki：插件开发快速开始](/inoryxin/QixinBot-go/wiki/插件开发-快速开始)。
+完整手册见 [Wiki：插件开发快速开始](http://10.0.0.123:8090/guide/plugin-quickstart.html)。
 
 ## 目录结构
 
