@@ -1,0 +1,19 @@
+[Unit]
+Description=Qixin OneBot Framework
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/qixinbot
+ExecStart=/opt/qixinbot/bin/qixinbot -config /opt/qixinbot/config.toml
+Restart=always
+RestartSec=5
+# 按实际部署用户改
+User=qixinbot
+Group=qixinbot
+# 插件是子进程，给它一个足够大的文件句柄上限
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

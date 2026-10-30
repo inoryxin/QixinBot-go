@@ -1,0 +1,38 @@
+# Linux 部署配置示例（复制为 config.toml 后按需修改）
+
+[[accounts]]
+id = "main"
+ws_url = "ws://127.0.0.1:3001"
+access_token = "YOUR_TOKEN"
+http_url = "http://127.0.0.1:3000"
+http_token = "YOUR_TOKEN"
+
+[command]
+prefixes = ["/"]
+
+[plugin]
+dir = "plugins"
+hot_reload = true
+timeout_ms = 30000
+
+[web]
+enable = true
+addr = "0.0.0.0:7801"
+show_tools = "auto"          # auto: 有插件声明工具才显示 | always | never        # 局域网可访问；用账号密码登录
+username = "admin"
+password = "CHANGE_ME"
+
+[log]
+level = "info"
+gate_debug = false           # 排查"为什么不理我"时改 true
+file = "data/bot.log"
+
+[owner]
+users = [2849446053]         # 主人 QQ，全局最高权限
+
+[permissions]
+mode = "allow_all"
+
+[send]
+interval_ms = 300
+allow_groups = []            # 非空时插件只能往这些群发消息

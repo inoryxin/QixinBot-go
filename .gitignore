@@ -1,0 +1,60 @@
+# 编译产物
+/bin/
+/dist/
+
+# 运行时数据：插件、插件配置、审计、日志、聊天记录
+/data/
+/plugins/
+
+# 本地配置（含 token、密码）
+/config.toml
+
+# Go 工具链缓存（tools/ 下是本机便携版 Go）
+/tools/go/
+/tools/go-*.zip
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 部署用的真实配置（含 token/密码）
+/deploy/config.toml
+
+# 签名私钥
+*.priv
+testkey.*
+
+
+# 部署包（单独仓库 QixinBot-release）
+/release/
+
+
+# 构建产物（根目录误放的也算）
+*.exe
+*.dll
+*.so
+
+# 运行时打包临时目录/产物
+/.runtime-build/
+/runtimes/*.anzu
+
+__pycache__/
+*.pyc
+
+# 本地 dev 实例数据（.dev-<pid>/）与临时实验目录/文件
+/.dev-*/
+/.tmp-*
+
+# 本地构建产物
+*.devbuild
+/QixinBot-release-*.zip
+
+# cohost 实验产物（大体积，不入库）
+experiment/m0/plugins/
+experiment/m0/m0-data/
+experiment/m0-run.log

@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: 静态检查
+        run: go vet ./...
+
+      - name: 单元测试 + 集成测试
+        run: go test ./... -race -count=1
+
+      - name: 构建（Linux）
+        run: go build -o /tmp/qixinbot ./cmd/bot
+
+      - name: 构建插件打包工具
+        run: go build -o /tmp/qixinpack ./tools/qixinpack
+
+      - name: 构建 mock 协议端
+        run: go build -o /tmp/mock-onebot ./tools/mock-onebot
+
+  build-windows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # 跨平台构建：确认没有平台专用代码导致编译失败
+      - name: 构建 Windows 版本
+        run: |
+          GOOS=windows GOARCH=amd64 go build -o /tmp/qixinbot.exe ./cmd/bot
+          GOOS=windows GOARCH=amd64 go build -o /tmp/qixinpack.exe ./tools/qixinpack
+
+  lint-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 插件 SDK 和自带插件的语法检查
+      - name: 检查 SDK 语法
+        run: node --check sdk/node/qixin.mjs
+
+      - name: SDK 一致性
+        run: python3 tools/sdk-conformance.py
+
+      - name: 检查插件语法
+        run: |
+          for f in dist/*/app/index.js; do
+            if [ -f "$f" ]; then
+              echo "checking $f"
+              node --check "$f"
+            fi
+          done

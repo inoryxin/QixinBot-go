@@ -1,0 +1,70 @@
+# QixinBot 配置示例：复制为 config.toml 后修改
+# SnowLuma 默认端口：WS 3001 / HTTP 3000 / WebUI 5099
+
+[[accounts]]
+id = "main"                              # 框架内部标识，可以随便起
+ws_url = "ws://127.0.0.1:3001"           # SnowLuma 的 OneBot WebSocket
+access_token = ""                        # SnowLuma 里配置的 WS 令牌
+http_url = "http://127.0.0.1:3000"       # 可选，兜底调用
+http_token = ""
+
+[command]
+prefixes = ["/"]
+
+[plugin]
+# 共享运行时宿主（默认开）：声明 cohost = true 的纯 JS 插件共用一个 Node 进程
+# cohost_enabled = false
+# 注入到所有插件进程的环境变量（不影响宿主）。
+# 跨平台指定外部依赖位置，例如：
+#   [plugin.env]
+#   FFMPEG_PATH = "C:\\tools\\ffmpeg.exe"
+
+dir = "plugins"
+hot_reload = false
+timeout_ms = 30000
+
+# **额外**信任的签名公钥（base64）。
+#
+# 官方公钥已内置在框架里（指纹 421fdda94e09c5e2），装官方插件
+# **不需要在这里配任何东西**——新增官方插件也不用改配置。
+# 这里只放第三方插件作者的公钥；也可以不改文件，
+# 在控制台「插件 → 可信签名者」里贴，立刻生效。
+trusted_keys = []
+
+# 允许安装**未签名**的插件（自己开发时用）。
+# 只放行"没签"，签名无效的包始终拒绝。生产环境保持 false。
+allow_unsigned = false
+
+[web]
+# 界面主题包（kind="theme" 的 .anzu，在「连接」页上传后填其 id；留空 = 内置配色）
+# theme_pack = ""
+enable = true
+addr = "127.0.0.1:7801"                  # 局域网访问改 0.0.0.0:7801
+show_tools = "auto"                      # 工具页：auto(默认) | always | never
+username = "admin"
+password = "change-me"                   # 留空则每次启动生成临时密码并打印到日志
+
+[log]
+level = "info"
+file = "data/bot.log"
+gate_debug = false                       # true 时记录被前缀/@/权限拦下的消息
+
+[owner]
+users = []                               # 框架所有者 QQ，不受任何权限策略限制
+
+[permissions]
+# allow_all：装完即用，插件命令默认所有人可用
+# deny_all：默认拒绝，需在插件的 plugin.toml 里显式写 allow_users / allow_groups
+mode = "allow_all"
+
+[send]
+interval_ms = 300                        # 同一会话两条消息的最小间隔，防风控
+allow_groups = []                        # 非空时，插件只能往这些群发消息（空 = 不限）
+
+# 持久化后端
+# sqlite = 默认。每次只改一行，群多了也不会越写越慢
+# json   = 一个文件存全部，适合本地调试/数据量极小
+# 从 json 切到 sqlite 时，首次启动会自动把老数据迁进来
+[storage]
+driver = "sqlite"
+# path = "data/qixin.db"   # 留空按 driver 取默认值
