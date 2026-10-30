@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/inoryxin/QixinBot-go/releases">下载</a> ·
-  <a href="http://10.0.0.123:8090/">文档</a> ·
+  <a href="https://github.com/inoryxin/QixinBot-go/wiki">文档</a> ·
   <a href="LICENSE">MIT License</a>
 </p>
 
@@ -148,7 +148,7 @@ cd <框架包>/bin
 ./qixinpack pack my-plugin -out plugins/my-plugin.anzu
 ```
 
-完整手册见 [Wiki：插件开发快速开始](http://10.0.0.123:8090/guide/plugin-quickstart.html)。
+完整手册见 [Wiki：插件开发快速开始](https://github.com/inoryxin/QixinBot-go/wiki/%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91-%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)。
 
 ## 目录结构
 
