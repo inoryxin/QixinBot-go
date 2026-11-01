@@ -261,7 +261,7 @@ func (s *Server) apiThemeSelect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.Log.Info("界面主题已切换", "theme", id)
-	http.Redirect(w, r, "/connect?theme=ok", http.StatusSeeOther)
+	http.Redirect(w, r, "/overview?theme=ok", http.StatusSeeOther)
 }
 
 // apiThemeUpload 上传主题包（.anzu，kind="theme"）。签名闸门在 plugin 包里。
@@ -296,7 +296,7 @@ func (s *Server) apiThemeUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.Log.Info("主题包已上传", "theme", id)
-	http.Redirect(w, r, "/connect?theme=uploaded", http.StatusSeeOther)
+	http.Redirect(w, r, "/overview?theme=uploaded", http.StatusSeeOther)
 }
 
 // apiThemeRemove 删除已安装的主题包；正在使用中的拒绝先切换再删。
@@ -327,7 +327,7 @@ func (s *Server) apiThemeRemove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.Log.Info("主题包已删除", "theme", id)
-	http.Redirect(w, r, "/connect?theme=removed", http.StatusSeeOther)
+	http.Redirect(w, r, "/overview?theme=removed", http.StatusSeeOther)
 }
 
 var _ = errors.Is // 保留：后续错误分类用
