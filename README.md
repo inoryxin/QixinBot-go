@@ -7,6 +7,7 @@
 <p align="center">基于 OneBot 11 的机器人框架：<b>宿主用 Go，插件用任意语言</b>（独立子进程，stdio + JSON-RPC）</p>
 
 <p align="center">
+  <a href="https://bot.inory.xin">官网</a> ·
   <a href="https://github.com/inoryxin/QixinBot-go/releases">下载</a> ·
   <a href="https://github.com/inoryxin/QixinBot-go/wiki">文档</a> ·
   <a href="LICENSE">MIT License</a>
