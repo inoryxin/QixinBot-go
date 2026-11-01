@@ -38,6 +38,18 @@ func ipBlocked(ip net.IP) bool {
 			return true
 		case v4[0] == 0:
 			return true
+		// IANA 特殊用途/文档网段：不是可访问的公网图片源，
+		// 留着会让 SSRF 代理变成内网探测跳板。
+		case v4[0] == 192 && v4[1] == 0 && v4[2] == 2: // TEST-NET-1
+			return true
+		case v4[0] == 198 && (v4[1] == 18 || v4[1] == 19): // benchmarking
+			return true
+		case v4[0] == 198 && v4[1] == 51 && v4[2] == 100: // TEST-NET-2
+			return true
+		case v4[0] == 203 && v4[1] == 0 && v4[2] == 113: // TEST-NET-3
+			return true
+		case v4[0] >= 240: // reserved / broadcast
+			return true
 		}
 	}
 	return false
