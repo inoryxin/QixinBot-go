@@ -108,9 +108,19 @@ func (env *hostEnv) doSend(ctx context.Context, m *plugin.Manifest, chat chatPar
 	if len(segs) == 0 {
 		return 0, plugin.Errf(plugin.CodeInvalidParams, "segments 为空")
 	}
-	if n := approxSize(segs); n > 7<<20 {
+	// 单张图单独算：之前按整条消息求和卡 7MB，一条消息带 4 张图必然被拒。
+	// QQ/协议端本身也是按张限制的，这里对齐——每张 ≤ maxImageBytes，
+	// 总量只留一个很高的兜底上限防内存炸（正常消息碰不到）。
+	for i, seg := range segs {
+		if n := segmentBytes(seg); n > maxImageBytes {
+			return 0, plugin.Errf(plugin.CodeInvalidParams,
+				"第 %d 个 %s 段太大（约 %d MB，单张上限 %d MB）。图片请先存到 data/ 下再用文件路径，别直接塞 base64",
+				i+1, seg.Type, n>>20, maxImageBytes>>20)
+		}
+	}
+	if n := approxSize(segs); n > maxMessageBytes {
 		return 0, plugin.Errf(plugin.CodeInvalidParams,
-			"消息太大（约 %d MB）。图片请先存到 data/ 下再用文件路径，别直接塞 base64", n>>20)
+			"消息总计太大（约 %d MB，上限 %d MB），一次少发几张", n>>20, maxMessageBytes>>20)
 	}
 
 	// 发送白名单：配置了 allow_groups 就只允许发这些群（空 = 不限）

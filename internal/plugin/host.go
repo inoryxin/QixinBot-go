@@ -543,7 +543,8 @@ func (h *Host) readLoop() {
 	// 默认 64KB 的 Scanner 装不下 base64 图片，必须手动放大。
 	r := bufio.NewReaderSize(h.stdout, 64<<10)
 	for {
-		line, tooLong, err := readLimitedLine(r, 16<<20)
+		// 多图消息的 base64 会拼进同一行：上限与消息总量兜底一致（64MB）
+		line, tooLong, err := readLimitedLine(r, 64<<20)
 		if tooLong {
 			h.Log.Warn("插件输出单行过长，已丢弃", "plugin", h.Manifest.ID)
 			continue

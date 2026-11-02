@@ -307,7 +307,30 @@ func resolveMedia(segments []onebot.Segment, dataRoot string) ([]onebot.Segment,
 	return out, nil
 }
 
-// approxSize 估算消息段序列化后的大小，用于挡掉过大的 base64。
+// 单张图上限与整条消息兜底上限。QQ/协议端按张限制图片大小，框架也按张检查；
+// 总量上限只防内存/WS 帧过大，正常多图消息碰不到。
+const (
+	maxImageBytes   = 20 << 20 // 单张 20 MB（与媒体文件读取上限一致）
+	maxMessageBytes = 64 << 20 // 整条消息兜底 64 MB
+)
+
+// segmentBytes 估算单个消息段里内联数据的字节数。
+// base64:// 按解码后的真实大小算（长度 * 3/4），其余按字段长度。
+func segmentBytes(seg onebot.Segment) int {
+	total := 0
+	for k, v := range seg.Data {
+		s, ok := v.(string)
+		if !ok {
+			continue
+		}
+		if (k == "file" || k == "url") && strings.HasPrefix(s, "base64://") {
+			total += len(strings.TrimPrefix(s, "base64://")) / 4 * 3
+			continue
+		}
+		total += len(s)
+	}
+	return total
+}
 
 // approxSize 估算消息段序列化后的大小，用于挡掉过大的 base64。
 func approxSize(segments []onebot.Segment) int {
