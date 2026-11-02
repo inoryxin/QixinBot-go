@@ -41,7 +41,7 @@ import (
 	"github.com/xin/onebot/internal/webui"
 )
 
-var version = "1.0.0"
+var version = "1.0.1"
 
 func main() {
 	configPath := flag.String("config", "config.toml", "配置文件路径")
