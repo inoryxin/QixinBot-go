@@ -250,3 +250,45 @@ func (m *Manager) CapabilitiesOf(id string) []string {
 //
 // 只看 manifest 的 [[commands]]（含 aliases），不看插件自己的逻辑——
 // 宿主不可能知道插件内部怎么匹配，所以用"声明过没有"当判据。
+// HookResult 是一次分发钩子的返回。
+type HookResult struct {
+	Provider string
+	Data     json.RawMessage
+	Err      error
+}
+
+// CallCapabilityEach 依次调用某个能力的**所有**提供者（按优先级）。
+//
+// 和 CallCapability 的区别：这里不做"抢一个提供者"的语义，而是广播——
+// 每个提供者都有机会表态，用于 core.dispatch 这类统一钩子。
+// 单个提供者失败不影响其它提供者；不做用户权限门禁（钩子是框架机制，不是用户请求）。
+func (m *Manager) CallCapabilityEach(ctx context.Context, name string, args map[string]any, s *session.Session) []HookResult {
+	m.mu.RLock()
+	list := append([]capProvider(nil), m.caps[name]...)
+	m.mu.RUnlock()
+	out := make([]HookResult, 0, len(list))
+	if len(list) == 0 {
+		return out
+	}
+	params := map[string]any{"name": name, "args": args}
+	if s != nil {
+		params["session"] = s
+	}
+	for _, prov := range list {
+		cur, releaseCall, aerr := m.acquireHost(ctx, prov.ID)
+		if aerr != nil || cur == nil {
+			out = append(out, HookResult{Provider: prov.ID, Err: aerr})
+			continue
+		}
+		timeout := 5 * time.Second
+		if d := cur.Manifest.Timeouts.CapabilityTimeout(); d > 0 {
+			timeout = d
+		}
+		callCtx, cancel := context.WithTimeout(ctx, timeout)
+		res, err := cur.Call(callCtx, "plugin.call_tool", params)
+		releaseCall()
+		cancel()
+		out = append(out, HookResult{Provider: prov.ID, Data: res, Err: err})
+	}
+	return out
+}

@@ -252,6 +252,37 @@ value = "llm"
 
 工具超时 8 秒。**不要抛异常**，失败也返回 `{ok:false}`。
 
+### 2.5b `core.dispatch`：统一接管钩子
+
+插件在 manifest 里声明能力 `core.dispatch`（并加进 `provides`），就会在**每条消息分发前**被调用一次。
+框架按能力优先级依次问所有提供者，参数和 `call_tool` 一样（`args` 里是消息概要，`session` 是完整会话）：
+
+```json
+// args
+{ "text": "...", "raw_text": "...", "has_prefix": false, "mentioned": true,
+  "chat_type": "group", "chat_id": 123, "user_id": 456 }
+```
+
+返回（`data` 里三样都可选）：
+
+```json
+{ "ok": true, "data": {
+    "handled": true,              // 接管：不再分发给其它插件（通常自己已经回复）
+    "override": {                 // 只作用于这一条消息，不改持久状态
+      "role": "owner",            // 临时提权（owner/admin/member）
+      "require_prefix": false,    // 等效于带了命令前缀
+      "require_mention": false,   // 等效于 @ 了机器人
+      "text": "改写后的文本"
+    }
+} }
+```
+
+用途：按群/按模式接管消息（例如贴吧鱼模式自己生成回复并落独立记忆）、
+临时绕过门禁（提权 / 免前缀 / 免 @）、改写文本。
+
+注意：钩子是同步调用（默认 5 秒超时），别在里面做秒级以上的事；慢任务用 `host.background`。
+它只影响**这一次分发**，不改变任何持久配置。
+
 ### 2.6 `plugin.get_settings` ⏳ / `plugin.set_settings`
 
 `get_settings` 宿主目前不调用（配置由宿主从 `settings.json` 读）。保留给"插件自报配置"的场景。

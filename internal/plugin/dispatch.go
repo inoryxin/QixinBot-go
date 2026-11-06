@@ -334,6 +334,11 @@ func (m *Manager) Dispatch(ctx context.Context, s *session.Session) (*Host, bool
 	}
 	s.Trace.Add("分发", "", true, "开始")
 
+	// 统一接管钩子：声明了 core.dispatch 的插件可以在分发前接管消息或临时改权限
+	if m.applyDispatchHooks(ctx, s) {
+		return nil, true
+	}
+
 	order := m.dispatchOrder()
 
 	for _, id := range order {
@@ -697,3 +702,78 @@ func matchesDeclaredCommand(man *Manifest, text string) bool {
 }
 
 // truncateForLog 截断日志里的用户输入（避免刷屏，也避免日志里出现超长消息）。
+// applyDispatchHooks 调用所有声明了 core.dispatch 能力的插件。
+//
+// 返回 true 表示这条消息已被某个插件接管，不再进入常规插件分发。
+//
+// 钩子可以返回：
+//   { "handled": true }                       接管（不再分发；通常钩子自己已经回复）
+//   { "override": {                           临时改变这条消息的"权限/门禁"
+//       "role": "owner" | "admin" | "member",  临时提权（影响 access 门禁与后续判断）
+//       "require_prefix": false,               等效于这条消息带了前缀
+//       "require_mention": false,              等效于这条消息 @ 了机器人
+//       "text": "改写后的文本"
+//     } }
+//
+// override 只作用于当前这一条消息，不改任何持久状态。
+func (m *Manager) applyDispatchHooks(ctx context.Context, s *session.Session) bool {
+	args := map[string]any{
+		"text": s.Text, "raw_text": s.RawText,
+		"has_prefix": s.HasPrefix, "mentioned": s.Mentioned,
+		"chat_type": s.ChatType, "chat_id": s.ChatID, "user_id": s.UserID,
+	}
+	results := m.CallCapabilityEach(ctx, "core.dispatch", args, s)
+	for _, r := range results {
+		if r.Err != nil || len(r.Data) == 0 {
+			if m.DebugGate.Load() {
+				m.Log.Debug("分发钩子失败", "plugin", r.Provider, "err", r.Err)
+			}
+			continue
+		}
+		var resp struct {
+			OK   *bool `json:"ok"`
+			Data struct {
+				Handled  bool `json:"handled"`
+				Override struct {
+					Role           *string `json:"role"`
+					RequirePrefix  *bool   `json:"require_prefix"`
+					RequireMention *bool   `json:"require_mention"`
+					Text           *string `json:"text"`
+				} `json:"override"`
+			} `json:"data"`
+		}
+		if err := json.Unmarshal(r.Data, &resp); err != nil {
+			continue
+		}
+		ov := resp.Data.Override
+		changed := false
+		if ov.Role != nil && *ov.Role != "" {
+			s.Role = *ov.Role
+			changed = true
+		}
+		if ov.RequirePrefix != nil {
+			s.HasPrefix = !*ov.RequirePrefix
+			changed = true
+		}
+		if ov.RequireMention != nil {
+			s.Mentioned = !*ov.RequireMention
+			changed = true
+		}
+		if ov.Text != nil {
+			s.Text = *ov.Text
+			changed = true
+		}
+		if changed {
+			if s.Trace != nil {
+				s.Trace.Add("钩子", r.Provider, true, "override")
+			}
+		}
+		if resp.Data.Handled {
+			if s.Trace != nil {
+				s.Trace.Add("钩子", r.Provider, true, "接管")
+			}
+			return true
+		}
+	}
+	return false
+}
